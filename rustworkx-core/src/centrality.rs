@@ -473,25 +473,25 @@ where
     let mut predecessors = vec![Vec::new(); c];
     let mut predecessor_edges = vec![Vec::new(); c];
     let mut sigma = vec![0.0; c];
-    let mut distance = vec![-1; c];
+    let mut distance: Vec<Option<usize>> = vec![None; c];
     #[allow(non_snake_case)]
     let mut Q: VecDeque<G::NodeId> = VecDeque::with_capacity(c);
 
     sigma[graph.to_index(*node_s)] = 1.;
-    distance[graph.to_index(*node_s)] = 0;
+    distance[graph.to_index(*node_s)] = Some(0);
     Q.push_back(*node_s);
     while let Some(v) = Q.pop_front() {
         verts_sorted_by_distance.push(v);
         let v_index = graph.to_index(v);
-        let distance_v = distance[v_index];
+        let distance_v = distance[v_index].unwrap();
         for edge in graph.edges(v) {
             let w = edge.target();
             let w_index = graph.to_index(w);
-            if distance[w_index] < 0 {
+            if distance[w_index].is_none() {
                 Q.push_back(w);
-                distance[w_index] = distance_v + 1;
+                distance[w_index] = Some(distance_v + 1);
             }
-            if distance[w_index] == distance_v + 1 {
+            if distance[w_index] == Some(distance_v + 1) {
                 sigma[w_index] += sigma[v_index];
                 let e_p = predecessors.get_mut(w_index).unwrap();
                 e_p.push(v);

@@ -469,7 +469,7 @@ where
     G::EdgeId: Eq,
 {
     let mut verts_sorted_by_distance: Vec<G::NodeId> = Vec::new(); // a stack
-    let c = graph.node_count();
+    let c = graph.node_bound();
     let mut predecessors = vec![Vec::new(); c];
     let mut predecessor_edges = vec![Vec::new(); c];
     let mut sigma = vec![0.0; c];
@@ -627,6 +627,32 @@ mod test_edge_betweenness_centrality {
     fn test_stable_graph_with_removed_edges() {
         let mut graph: StableGraph<(), (), Undirected> =
             StableGraph::from_edges([(0, 1), (1, 2), (2, 3), (3, 0)]);
+        graph.remove_edge(edge_index(1));
+        let result = edge_betweenness_centrality(&graph, false, 50);
+        let expected_values = vec![Some(3.0), None, Some(3.0), Some(4.0)];
+        assert_eq!(result, expected_values);
+    }
+
+    #[test]
+    fn test_stable_graph_with_removed_nodes_and_edges() {
+        let mut graph: StableGraph<(), (), Undirected> = StableGraph::default();
+        let n0 = graph.add_node(());
+        let d0 = graph.add_node(());
+        let n1 = graph.add_node(());
+        let d1 = graph.add_node(());
+        let n2 = graph.add_node(());
+        let d2 = graph.add_node(());
+        let n3 = graph.add_node(());
+
+        graph.remove_node(d0);
+        graph.remove_node(d1);
+        graph.remove_node(d2);
+
+        graph.add_edge(n0, n1, ());
+        graph.add_edge(n1, n2, ());
+        graph.add_edge(n2, n3, ());
+        graph.add_edge(n3, n0, ());
+
         graph.remove_edge(edge_index(1));
         let result = edge_betweenness_centrality(&graph, false, 50);
         let expected_values = vec![Some(3.0), None, Some(3.0), Some(4.0)];

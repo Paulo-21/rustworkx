@@ -411,24 +411,24 @@ where
     let mut verts_sorted_by_distance: Vec<G::NodeId> = Vec::with_capacity(c); // a stack
     let mut predecessors: Vec<Vec<usize>> = vec![Vec::new(); max_index];
     let mut sigma: Vec<f64> = vec![0.; max_index];
-    let mut distance: Vec<i64> = vec![-1; max_index];
+    let mut distance: Vec<Option<usize>> = vec![None; max_index];
     #[allow(non_snake_case)]
     let mut Q: VecDeque<G::NodeId> = VecDeque::with_capacity(c);
     let node_s_index = graph.to_index(*node_s);
     sigma[node_s_index] = 1.0;
-    distance[node_s_index] = 0;
+    distance[node_s_index] = Some(0);
     Q.push_back(*node_s);
     while let Some(v) = Q.pop_front() {
         verts_sorted_by_distance.push(v);
         let v_idx = graph.to_index(v);
-        let distance_v = distance[v_idx];
+        let distance_v = distance[v_idx].unwrap();
         for w in graph.neighbors(v) {
             let w_idx = graph.to_index(w);
-            if distance[w_idx] < 0 {
+            if distance[w_idx].is_none() {
                 Q.push_back(w);
-                distance[w_idx] = distance_v + 1;
+                distance[w_idx] = Some(distance_v + 1);
             }
-            if distance[w_idx] == distance_v + 1 {
+            if distance[w_idx] == Some(distance_v + 1) {
                 sigma[w_idx] += sigma[v_idx];
                 predecessors[w_idx].push(v_idx);
             }

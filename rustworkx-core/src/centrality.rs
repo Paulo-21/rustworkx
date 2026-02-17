@@ -660,6 +660,40 @@ mod test_edge_betweenness_centrality {
     }
 }
 
+#[cfg(test)]
+mod test_betweenness_centrality {
+    use crate::centrality::betweenness_centrality;
+    use petgraph::Undirected;
+    use petgraph::graph::edge_index;
+    use petgraph::prelude::StableGraph;
+
+    #[test]
+    fn test_stable_graph_with_removed_nodes_and_edges() {
+        let mut graph: StableGraph<(), (), Undirected> = StableGraph::default();
+        let n0 = graph.add_node(());
+        let d0 = graph.add_node(());
+        let n1 = graph.add_node(());
+        let d1 = graph.add_node(());
+        let n2 = graph.add_node(());
+        let d2 = graph.add_node(());
+        let n3 = graph.add_node(());
+
+        graph.remove_node(d0);
+        graph.remove_node(d1);
+        graph.remove_node(d2);
+
+        graph.add_edge(n0, n1, ());
+        graph.add_edge(n1, n2, ());
+        graph.add_edge(n2, n3, ());
+        graph.add_edge(n3, n0, ());
+        graph.remove_edge(edge_index(1));
+
+        let result = betweenness_centrality(&graph, false, false, 50);
+        let expected_values = vec![Some(2.0), None, Some(0.0), None, Some(0.0), None, Some(2.0)];
+        assert_eq!(result, expected_values);
+    }
+}
+
 /// Compute the eigenvector centrality of a graph
 ///
 /// For details on the eigenvector centrality refer to:
